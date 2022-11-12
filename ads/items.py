@@ -15,5 +15,9 @@ class HousingItems(scrapy.Item):
     description = scrapy.Field()
     parse_datetime = scrapy.Field()
     ad_url = scrapy.Field()
+    daily = scrapy.Field()
+    address = scrapy.Field()
+    additional = scrapy.Field()
+    images = scrapy.Field()
     # upload_time = scrapy.Field()
 

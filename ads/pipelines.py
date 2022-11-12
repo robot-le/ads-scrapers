@@ -1,4 +1,4 @@
-from itemadapter import ItemAdapter, adapter
+from itemadapter import ItemAdapter
 import psycopg2
 from dotenv import load_dotenv
 import os
@@ -7,7 +7,7 @@ from scrapy.exceptions import DropItem
 
 load_dotenv()
 
-class AdsPipeline:
+class AdsDatabasePipeline:
 
     def __init__(self):
         hostname = os.environ.get('HOSTNAME')
@@ -34,7 +34,11 @@ class AdsPipeline:
                                  currency text,
                                  description text,
                                  parse_datetime timestamp,
-                                 ad_url text
+                                 ad_url text,
+                                 daily boolean,
+                                 address text,
+                                 additional text,
+                                 images text
                                  )
                          ''')
 
@@ -60,8 +64,16 @@ class AdsPipeline:
                                  currency,
                                  description,
                                  parse_datetime,
-                                 ad_url
+                                 ad_url,
+                                 daily,
+                                 address,
+                                 additional,
+                                 images
                                  ) values (
+                                         %s,
+                                         %s,
+                                         %s,
+                                         %s,
                                          %s,
                                          %s,
                                          %s,
@@ -78,7 +90,12 @@ class AdsPipeline:
                             item['currency'],
                             item['description'],
                             item['parse_datetime'],
-                            item['ad_url'],))
+                            item['ad_url'],
+                            item['daily'],
+                            item['address'],
+                            item['additional'],
+                            item['images'],
+                            ))
 
         self.connection.commit()
         return item
@@ -87,3 +104,5 @@ class AdsPipeline:
         self.cur.close()
         self.connection.close()
 
+class AdsPipeline:
+    pass

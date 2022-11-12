@@ -74,7 +74,8 @@ RANDOM_UA_PER_PROXY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'ads.pipelines.AdsPipeline': 300,
+   # 'ads.pipelines.AdsPipeline': 300,
+   'ads.pipelines.AdsDatabasePipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

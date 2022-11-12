@@ -68,13 +68,43 @@ class RealEstateSpider(scrapy.Spider):
         item = json.loads(response.body)
         items = HousingItems()
 
-        items['site'] = 'https://lalafo.kg/'
-        items['category'] = response.meta.get('ad_label')
+        items['site'] = self.name
         items['title'] = item.get('title')
         items['price'] = item.get('price')
         items['currency'] = item.get('currency')
         items['description'] = item.get('description')
         items['parse_datetime'] = datetime.now()
         items['ad_url'] = item.get('url')
+        images = item.get('images')
+        if images:
+            items['images'] = '\n'.join([x['original_url'] for x in images])
+
+        category = response.meta.get('ad_label')
+        if 'квартир' in category.lower():
+            items['category'] = 'Квартира'
+        elif 'дом' in category.lower():
+            items['category'] = 'Дом'
+        elif 'комнат' in category.lower():
+            items['category'] = 'Комната'
+        else:
+            items['category'] = None
+
+        params = item.get('params')
+
+        items['address'] = None
+        for param in params:
+            if 'район' in param['name'].lower():
+                items['address'] = param['value']
+                break
+
+        if params:
+            items['additional'] = '\n'.join([f"{el['name']}: {el['value']}" for el in params])
+        else:
+            items['additional'] = None
+
+        if 'долгосрочная' in items['category'].lower():
+            items['daily'] = False
+        else:
+            items['daily'] = True
 
         yield items

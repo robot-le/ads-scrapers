@@ -42,23 +42,31 @@ class HouseSpider(scrapy.Spider):
 
     def parse_ad(self, response):
         items = HousingItems()
-        # additional = {}
-        # for row in response.xpath('//div[@class="info-row"]'):
-        #     if row.xpath('./div[1]/text()').get().strip() == 'Тип предложения':
-        #         continue
-        #     additional[f'''{row.xpath('./div[1]/text()').get().strip()}'''] = row.xpath('./div[2]/text()').get().strip()
+        additional = {}
+        for row in response.xpath('//div[@class="info-row"]'):
+            if row.xpath('./div[1]/text()').get().strip() == 'Тип предложения':
+                continue
+            additional[f'''{row.xpath('./div[1]/text()').get().strip()}'''] = row.xpath('./div[2]/text()').get().strip()
 
-        items['site'] = 'https://house.kg/'
+        rental_period = additional.get('Период аренды')
+
+        if rental_period is not None and rental_period.lower().strip() == 'посуточно':
+            items['daily'] = True
+        else:
+            items['daily'] = False
+
+        items['site'] = self.name
         items['category'] = response.meta.get('category')
         items['title'] =  response.xpath('//title/text()').get()
-        # items['price_usd'] = response.xpath('//div[@class="price-dollar"]/text()').get().replace('$', '').replace(' ', '')
         items['price'] = response.xpath('//div[@class="price-som"]/text()').get().replace('сом', '').replace(' ', '')
         items['currency'] = 'KGS'
         items['description'] = response.meta.get('description')
         items['parse_datetime'] = datetime.now()
         items['ad_url'] = response.url
+        items['address'] = response.meta.get('address')
+        items['additional'] = '\n'.join([f'{key}: {value}' for key, value in additional.items()])
+        items['images'] = None
+        # items['price_usd'] = response.xpath('//div[@class="price-dollar"]/text()').get().replace('$', '').replace(' ', '')
         # items['rooms'] = response.meta.get('rooms')
-        # items['address'] = response.meta.get('address')
-        # items['additional_info'] = additional
 
         yield items
