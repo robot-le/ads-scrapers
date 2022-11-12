@@ -1,6 +1,7 @@
 import scrapy
 from ads.items import HousingItems
-from datetime import datetime, timedelta
+from datetime import datetime
+import re
 
 
 class DoskaSpider(scrapy.Spider):
@@ -36,7 +37,7 @@ class DoskaSpider(scrapy.Spider):
         items = HousingItems()
         div_in_col_el = response.xpath('//div[@itemtype="http://schema.org/Place"]/../div')
         items_list = [x for x in response.xpath('//div[@itemtype="http://schema.org/Place"]/div')] + div_in_col_el[1:3]
-        items_dict = {key.xpath('.//b/text()').get().strip(): value.xpath('.//text()').getall()[-1].strip() for (key, value) in dict(zip(items_list, items_list)).items()}  # TODO: графа этаж не парсится
+        items_dict = {key.xpath('.//b/text()').get().strip(): value.xpath('.//text()').getall()[-1].strip() for (key, value) in dict(zip(items_list, items_list)).items() if not 'этаж' in key.xpath('.//b/text()').get().lower()}
 
         items['site'] = self.name
         items['currency'] = response.xpath('//span[@itemprop="priceCurrency"]/@content').get()
@@ -47,7 +48,15 @@ class DoskaSpider(scrapy.Spider):
         items['ad_url'] = response.url
         items['address'] = items_dict.get('Адрес:')
         items['additional'] = '\n'.join([f'{key} {value}' for key, value in items_dict.items()])
-        items['images'] = None
+
+        images_style_attr = response.xpath('//div[contains(@class, "aki_gallery_thumbs")]/div/@style').getall()
+        images = []
+        for attr in images_style_attr:
+            images.append(
+                    re.findall(r'url\(.+\)', attr)[0].replace("url('", 'https:').replace('.80.', '.f.').replace("')", "")
+                    )
+
+        items['images'] = images
 
         category = response.meta.get('category')
         if 'квартиры' in category.lower():

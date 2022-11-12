@@ -77,7 +77,9 @@ class RealEstateSpider(scrapy.Spider):
         items['ad_url'] = item.get('url')
         images = item.get('images')
         if images:
-            items['images'] = '\n'.join([x['original_url'] for x in images])
+            items['images'] = [x['original_url'] for x in images]
+        else:
+            items['images'] = []
 
         category = response.meta.get('ad_label')
         if 'квартир' in category.lower():

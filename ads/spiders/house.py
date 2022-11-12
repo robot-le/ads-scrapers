@@ -65,7 +65,8 @@ class HouseSpider(scrapy.Spider):
         items['ad_url'] = response.url
         items['address'] = response.meta.get('address')
         items['additional'] = '\n'.join([f'{key}: {value}' for key, value in additional.items()])
-        items['images'] = None
+        images = response.xpath('//div[@class="fotorama"]/a/@data-full').getall()
+        items['images'] = images
         # items['price_usd'] = response.xpath('//div[@class="price-dollar"]/text()').get().replace('$', '').replace(' ', '')
         # items['rooms'] = response.meta.get('rooms')
 

@@ -13,7 +13,7 @@ SPIDER_MODULES = ['ads.spiders']
 NEWSPIDER_MODULE = 'ads.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'ads (+http://www.yourdomain.com)'
+# USER_AGENT = None
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -44,7 +44,7 @@ COOKIES_ENABLED = False
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    'ads.middlewares.AdsSpiderMiddleware': 543,
+   # 'ads.middlewares.AdsSpiderMiddleware': 543,
 # }
 
 # Enable or disable downloader middlewares
@@ -57,9 +57,9 @@ COOKIES_ENABLED = False
 # }
 
 # scrapy_user_agents parameters
-RANDOM_UA_TYPE = 'desktop.random'
-RANDOM_UA_SAME_OS_FAMILY = False
-RANDOM_UA_PER_PROXY = True
+# RANDOM_UA_TYPE = 'desktop.random'
+# RANDOM_UA_SAME_OS_FAMILY = False
+# RANDOM_UA_PER_PROXY = True
 
 # scrapy-rotating-proxies parameters
 # ROTATING_PROXY_LIST_PATH = r'../proxies.txt'

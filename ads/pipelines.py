@@ -38,7 +38,7 @@ class AdsDatabasePipeline:
                                  daily boolean,
                                  address text,
                                  additional text,
-                                 images text
+                                 images text[]
                                  )
                          ''')
 
