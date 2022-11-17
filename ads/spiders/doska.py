@@ -39,7 +39,7 @@ class DoskaSpider(scrapy.Spider):
         items_list = [x for x in response.xpath('//div[@itemtype="http://schema.org/Place"]/div')] + div_in_col_el[1:3]
         items_dict = {key.xpath('.//b/text()').get().strip(): value.xpath('.//text()').getall()[-1].strip() for (key, value) in dict(zip(items_list, items_list)).items() if not 'этаж' in key.xpath('.//b/text()').get().lower()}
 
-        items['site'] = self.name
+        items['site'] = 'doska.kg'
         items['currency'] = response.xpath('//span[@itemprop="priceCurrency"]/@content').get()
         items['price'] = response.xpath('//span[@itemprop="price"]/@content').get()
         items['description'] = ''.join(response.xpath('//div[@itemtype="http://schema.org/Place"]/../../div[2]/span/text()').getall())
@@ -66,12 +66,12 @@ class DoskaSpider(scrapy.Spider):
         else:
             items['category'] = None
 
-        if ('посуточн' in items['title'] or 
-                'сутк' in items['title']) or ('посуточн' in items['description'] or 
-                                                  'сутк' in items['description']):
+        if ('посуточн' in items['title'].lower() or 
+                'сутк' in items['title'].lower()) or ('посуточн' in items['description'].lower() or 
+                                                          'сутк' in items['description'].lower()):
             items['daily'] = True
         else:
-            items['daily'] = False
+            items['daily'] = None
 
         # months = {
         #     ' Января ':   '.01.',

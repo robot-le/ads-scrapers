@@ -68,7 +68,7 @@ class RealEstateSpider(scrapy.Spider):
         item = json.loads(response.body)
         items = HousingItems()
 
-        items['site'] = self.name
+        items['site'] = 'lalafo.kg'
         items['title'] = item.get('title')
         items['price'] = item.get('price')
         items['currency'] = item.get('currency')
@@ -82,6 +82,12 @@ class RealEstateSpider(scrapy.Spider):
             items['images'] = []
 
         category = response.meta.get('ad_label')
+
+        if 'долгосрочная' in category.lower():
+            items['daily'] = False
+        else:
+            items['daily'] = True
+
         if 'квартир' in category.lower():
             items['category'] = 'Квартира'
         elif 'дом' in category.lower():
@@ -103,10 +109,5 @@ class RealEstateSpider(scrapy.Spider):
             items['additional'] = '\n'.join([f"{el['name']}: {el['value']}" for el in params])
         else:
             items['additional'] = None
-
-        if 'долгосрочная' in items['category'].lower():
-            items['daily'] = False
-        else:
-            items['daily'] = True
 
         yield items

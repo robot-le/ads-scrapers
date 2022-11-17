@@ -52,10 +52,12 @@ class HouseSpider(scrapy.Spider):
 
         if rental_period is not None and rental_period.lower().strip() == 'посуточно':
             items['daily'] = True
+        elif rental_period is None:
+            items['daily'] = None
         else:
             items['daily'] = False
 
-        items['site'] = self.name
+        items['site'] = 'house.kg'
         items['category'] = response.meta.get('category')
         items['title'] =  response.xpath('//title/text()').get()
         items['price'] = response.xpath('//div[@class="price-som"]/text()').get().replace('сом', '').replace(' ', '')
