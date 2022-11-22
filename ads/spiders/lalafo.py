@@ -98,16 +98,21 @@ class RealEstateSpider(scrapy.Spider):
             items['category'] = None
 
         params = item.get('params')
-
-        items['address'] = None
-        for param in params:
-            if 'район' in param['name'].lower():
-                items['address'] = param['value']
-                break
-
         if params:
-            items['additional'] = '\n'.join([f"{el['name']}: {el['value']}" for el in params])
+            params_dict = {x['name']: x['value'] for x in params}
+            items['additional'] = '\n'.join([f"{key}: {value}" for key, value in params_dict.items()])
         else:
+            params_dict = {}
             items['additional'] = None
+
+        items['address'] = params_dict.get('Район')
+        items['rooms'] = params_dict.get('Количество комнат')
+        items['apartment_area'] = params_dict.get('Площадь (м2)')
+        items['land_area'] = params_dict.get('Площадь участка (соток)')
+        items['series'] = params_dict.get('Серия')
+        items['furniture'] = params_dict.get('Мебель')
+        items['pets'] = params_dict.get('Животные')
+        items['renovation'] = params_dict.get('Ремонт')
+        items['seller'] = params_dict.get('Кто сдает')
 
         yield items

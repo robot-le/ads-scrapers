@@ -44,9 +44,11 @@ class HouseSpider(scrapy.Spider):
         items = HousingItems()
         additional = {}
         for row in response.xpath('//div[@class="info-row"]'):
-            if row.xpath('./div[1]/text()').get().strip() == 'Тип предложения':
+            param = row.xpath('./div[1]/text()').get().strip()
+            if param == 'Тип предложения':
+                additional[f'''{param}'''] = row.xpath('./div[2]/span/text()').get().strip()
                 continue
-            additional[f'''{row.xpath('./div[1]/text()').get().strip()}'''] = row.xpath('./div[2]/text()').get().strip()
+            additional[f'''{param}'''] = row.xpath('./div[2]/text()').get().strip()
 
         rental_period = additional.get('Период аренды')
 
@@ -70,6 +72,18 @@ class HouseSpider(scrapy.Spider):
         images = response.xpath('//div[@class="fotorama"]/a/@data-full').getall()
         items['images'] = images
         # items['price_usd'] = response.xpath('//div[@class="price-dollar"]/text()').get().replace('$', '').replace(' ', '')
-        # items['rooms'] = response.meta.get('rooms')
+        items['rooms'] = response.meta.get('rooms')
+        # items['upload_time'] = None
+        apartment_area = additional.get('Площадь')
+        if apartment_area:
+            items['apartment_area'] = int(apartment_area.split('м2')[0].strip())
+        else:
+            items['apartment_area'] = None
+        items['land_area'] = additional.get('Площадь участка')
+        items['series'] = additional.get('Серия')
+        items['furniture'] = additional.get('Мебель')
+        items['renovation'] = additional.get('Состояние')
+        items['pets'] = None
+        items['seller'] = additional.get('Тип предложения')
 
         yield items

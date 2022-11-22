@@ -7,6 +7,9 @@ from scrapy.exceptions import DropItem
 
 load_dotenv()
 
+table_name = 'ads'
+# table_name = 'housing_aggregator_ad'
+
 class AdsDatabasePipeline:
 
     def __init__(self):
@@ -24,21 +27,29 @@ class AdsDatabasePipeline:
 
         self.cur = self.connection.cursor()
 
-        self.cur.execute('''
-                         create table if not exists ads(
-                                 ads_id serial primary key,
-                                 site text,
-                                 category text,
-                                 title text,
-                                 price decimal,
-                                 currency text,
-                                 description text,
-                                 parse_datetime timestamp,
-                                 ad_url text,
-                                 daily boolean,
-                                 address text,
-                                 additional text,
-                                 images text[]
+        self.cur.execute(f'''
+                         create table if not exists {table_name}(
+                                id serial primary key,
+                                site varchar(50),
+                                category varchar(50),
+                                title text,
+                                price decimal,
+                                currency varchar(5),
+                                description text,
+                                parse_datetime timestamp,
+                                ad_url varchar(400),
+                                daily boolean,
+                                address text,
+                                additional text,
+                                images text[],
+                                rooms text,
+                                apartment_area text,
+                                land_area text,
+                                series text,
+                                furniture text,
+                                renovation text,
+                                pets text,
+                                seller text
                                  )
                          ''')
 
@@ -46,7 +57,7 @@ class AdsDatabasePipeline:
 
         adapter = ItemAdapter(item)
 
-        self.cur.execute("select * from ads where ad_url = (%s)", (adapter['ad_url'], ))
+        self.cur.execute(f"select * from {table_name} where ad_url = (%s)", (adapter['ad_url'], ))
 
         if self.cur.fetchone() is not None:
             raise DropItem(f"Duplicate item found: {item!r}")
@@ -56,20 +67,36 @@ class AdsDatabasePipeline:
         else:
             price = None
         
-        self.cur.execute('''insert into ads(
-                                 site,
-                                 category,
-                                 title,
-                                 price,
-                                 currency,
-                                 description,
-                                 parse_datetime,
-                                 ad_url,
-                                 daily,
-                                 address,
-                                 additional,
-                                 images
+        self.cur.execute(f'''insert into {table_name}(
+                                site,
+                                category,
+                                title,
+                                price,
+                                currency,
+                                description,
+                                parse_datetime,
+                                ad_url,
+                                daily,
+                                address,
+                                additional,
+                                images,
+                                rooms,
+                                apartment_area,
+                                land_area,
+                                series,
+                                furniture,
+                                renovation,
+                                pets,
+                                seller
                                  ) values (
+                                         %s,
+                                         %s,
+                                         %s,
+                                         %s,
+                                         %s,
+                                         %s,
+                                         %s,
+                                         %s,
                                          %s,
                                          %s,
                                          %s,
@@ -95,6 +122,14 @@ class AdsDatabasePipeline:
                             item['address'],
                             item['additional'],
                             item['images'],
+                            item['rooms'],
+                            item['apartment_area'],
+                            item['land_area'],
+                            item['series'],
+                            item['furniture'],
+                            item['renovation'],
+                            item['pets'],
+                            item['seller'],
                             ))
 
         self.connection.commit()

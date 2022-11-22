@@ -19,5 +19,12 @@ class HousingItems(scrapy.Item):
     address = scrapy.Field()
     additional = scrapy.Field()
     images = scrapy.Field()
-    # upload_time = scrapy.Field()
+    rooms = scrapy.Field()
+    apartment_area = scrapy.Field()
+    land_area = scrapy.Field()
+    series = scrapy.Field()
+    furniture = scrapy.Field()
+    renovation = scrapy.Field()
+    pets = scrapy.Field()
+    seller = scrapy.Field()
 

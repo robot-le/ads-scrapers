@@ -1,6 +1,6 @@
 import scrapy
 from ads.items import HousingItems
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 
@@ -37,7 +37,7 @@ class DoskaSpider(scrapy.Spider):
         items = HousingItems()
         div_in_col_el = response.xpath('//div[@itemtype="http://schema.org/Place"]/../div')
         items_list = [x for x in response.xpath('//div[@itemtype="http://schema.org/Place"]/div')] + div_in_col_el[1:3]
-        items_dict = {key.xpath('.//b/text()').get().strip(): value.xpath('.//text()').getall()[-1].strip() for (key, value) in dict(zip(items_list, items_list)).items() if not 'этаж' in key.xpath('.//b/text()').get().lower()}
+        items_dict = {key.xpath('.//b/text()').get().strip().replace(':', ''): value.xpath('.//text()').getall()[-1].strip() for (key, value) in dict(zip(items_list, items_list)).items() if not 'этаж' in key.xpath('.//b/text()').get().lower()}
 
         items['site'] = 'doska.kg'
         items['currency'] = response.xpath('//span[@itemprop="priceCurrency"]/@content').get()
@@ -46,8 +46,23 @@ class DoskaSpider(scrapy.Spider):
         items['title'] = response.xpath('//h1[@class="item_title"]/text()').getall()[-1].strip()
         items['parse_datetime'] = datetime.now()
         items['ad_url'] = response.url
-        items['address'] = items_dict.get('Адрес:')
-        items['additional'] = '\n'.join([f'{key} {value}' for key, value in items_dict.items()])
+        items['address'] = items_dict.get('Адрес')
+        items['rooms'] = items_dict.get('Кол - во комнат')
+
+        apartment_area = items_dict.get('Общ . площадь')
+
+        if apartment_area:
+            items['apartment_area'] = int(apartment_area.replace(' кв . м .', ''))
+        else:
+            items['apartment_area'] = None
+
+        items['land_area'] = items_dict.get('Соток')
+        items['series'] = items_dict.get('Серия')
+        items['additional'] = '\n'.join([f'{key}: {value}' for key, value in items_dict.items()])
+        items['furniture'] = None
+        items['renovation'] = None
+        items['pets'] = None
+        items['seller'] = items_dict.get('Продавец')
 
         images_style_attr = response.xpath('//div[contains(@class, "aki_gallery_thumbs")]/div/@style').getall()
         images = []
@@ -92,14 +107,14 @@ class DoskaSpider(scrapy.Spider):
         #
         # if 'Позавчера' in upload_time:
         #     date = datetime.now() - timedelta(days=2)
-        #     items_dict['upload_time'] = date.strftime('%d.%m.%Y')
+        #     items['upload_time'] = date.strftime('%d.%m.%Y')
         # elif 'Вчера' in upload_time:
         #     date = datetime.now() - timedelta(days=1)
-        #     items_dict['upload_time'] = date.strftime('%d.%m.%Y')
+        #     items['upload_time'] = date.strftime('%d.%m.%Y')
         # elif 'Сегодня' in upload_time:
-        #     items_dict['upload_time'] = datetime.now().strftime('%d.%m.%Y')
+        #     items['upload_time'] = datetime.now().strftime('%d.%m.%Y')
         # else:
         #     for key, value in months.items():
-        #         items_dict['upload_time'] = upload_time.replace(key, value)
+        #         items['upload_time'] = upload_time.replace(key, value)
 
         yield items
